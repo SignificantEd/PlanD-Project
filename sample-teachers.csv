@@ -1,0 +1,11 @@
+Teacher_Name,Department,Room,Email,Phone,isPara,1A,1B,2A,2B,3A,3B,4A,4B,5A,5B,6A,6B,7A,7B,8A,8B,Prep_Periods,PLC_Periods,PD_Periods
+John Smith,Mathematics,Room 101,john.smith@school.edu,555-0101,false,Algebra 1,Algebra 1,Geometry,Geometry,Prep,Prep,Algebra 2,Algebra 2,Calculus,Calculus,Statistics,Statistics,Math Club,Math Club,2,3,1
+Sarah Johnson,Science,Room 205,sarah.johnson@school.edu,555-0102,false,Biology,Biology,Chemistry,Chemistry,Physics,Physics,Prep,Prep,Environmental Science,Environmental Science,Lab Prep,Lab Prep,Science Club,Science Club,4,5,2
+Michael Brown,English,Room 301,michael.brown@school.edu,555-0103,false,English 9,English 9,English 10,English 10,English 11,English 11,Prep,Prep,English 12,English 12,Creative Writing,Creative Writing,Literary Magazine,Literary Magazine,3,4,1
+Emily Davis,Social Studies,Room 402,emily.davis@school.edu,555-0104,false,World History,World History,US History,US History,Government,Government,Prep,Prep,Economics,Economics,Geography,Geography,Model UN,Model UN,2,5,3
+David Wilson,Physical Education,Room 501,david.wilson@school.edu,555-0105,false,PE 9,PE 9,PE 10,PE 10,PE 11,PE 11,Prep,Prep,PE 12,PE 12,Athletics,Athletics,Sports Club,Sports Club,3,4,2
+Lisa Anderson,Art,Room 601,lisa.anderson@school.edu,555-0106,false,Art 1,Art 1,Art 2,Art 2,Art 3,Art 3,Prep,Prep,Art 4,Art 4,Studio Art,Studio Art,Art Club,Art Club,2,5,1
+Robert Taylor,Music,Room 701,robert.taylor@school.edu,555-0107,false,Band,Band,Choir,Choir,Orchestra,Orchestra,Prep,Prep,Music Theory,Music Theory,Jazz Band,Jazz Band,Music Club,Music Club,4,3,2
+Jennifer Martinez,Spanish,Room 801,jennifer.martinez@school.edu,555-0108,false,Spanish 1,Spanish 1,Spanish 2,Spanish 2,Spanish 3,Spanish 3,Prep,Prep,Spanish 4,Spanish 4,AP Spanish,AP Spanish,Spanish Club,Spanish Club,3,2,1
+Christopher Lee,Computer Science,Room 901,christopher.lee@school.edu,555-0109,false,Computer Science 1,Computer Science 1,Computer Science 2,Computer Science 2,AP Computer Science,AP Computer Science,Prep,Prep,Web Design,Web Design,Programming,Programming,Coding Club,Coding Club,2,4,3
+Amanda White,Special Education,Room 1001,amanda.white@school.edu,555-0110,true,Resource Math,Resource Math,Resource English,Resource English,Resource Science,Resource Science,Prep,Prep,Life Skills,Life Skills,Study Skills,Study Skills,Peer Tutoring,Peer Tutoring,3,5,2 

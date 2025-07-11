@@ -1,0 +1,242 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String           @id @default(cuid())
+  email            String           @unique
+  password         String
+  name             String
+  role             String           @default("user")
+  schoolId         String
+  department       String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  reportedAbsences Absence[]        @relation("ReportedBy")
+  masterSchedule   MasterSchedule[]
+  school           School           @relation(fields: [schoolId], references: [id])
+
+  @@map("users")
+}
+
+model School {
+  id                String             @id @default(cuid())
+  name              String
+  location          String?
+  type              String             @default("public")
+  settings          Json?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  absences          Absence[]
+  constraintConfigs ConstraintConfig[]
+  departmentConfigs DepartmentConfig[]
+  loadLimitConfigs  LoadLimitConfig[]
+  masterSchedule    MasterSchedule[]
+  periodConfigs     PeriodConfig[]
+  scheduleConfigs   ScheduleConfig[]
+  users             User[]
+
+  @@map("schools")
+}
+
+model Absence {
+  id                   String                 @id @default(cuid())
+  teacherId            String
+  schoolId             String
+  date                 DateTime
+  absenceType          String
+  status               String                 @default("pending")
+  finalized            Boolean                @default(false)
+  notes                String?
+  periods              Json?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  school               School                 @relation(fields: [schoolId], references: [id])
+  teacher              User                   @relation("ReportedBy", fields: [teacherId], references: [id])
+  coverageAssignments  CoverageAssignment?
+  substituteAttendance SubstituteAttendance[]
+
+  @@map("absences")
+}
+
+model CoverageAssignment {
+  id            String   @id @default(cuid())
+  absenceId     String   @unique
+  period1st     String?
+  period2nd     String?
+  period3rd     String?
+  period4th     String?
+  period5th     String?
+  period6th     String?
+  period7th     String?
+  period8th     String?
+  period1stType String?
+  period2ndType String?
+  period3rdType String?
+  period4thType String?
+  period5thType String?
+  period6thType String?
+  period7thType String?
+  period8thType String?
+  status        String   @default("unassigned")
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  absence       Absence  @relation(fields: [absenceId], references: [id])
+
+  @@map("coverage_assignments")
+}
+
+model MasterSchedule {
+  id             String        @id @default(cuid())
+  teacherId      String
+  schoolId       String
+  periodConfigId String?
+  period         String
+  subject        String
+  room           String
+  dayOfWeek      String?
+  isTeaching     Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  periodConfig   PeriodConfig? @relation(fields: [periodConfigId], references: [id])
+  school         School        @relation(fields: [schoolId], references: [id])
+  teacher        User          @relation(fields: [teacherId], references: [id])
+
+  @@unique([teacherId, period, dayOfWeek])
+  @@map("master_schedule")
+}
+
+model Substitute {
+  id                 String                 @id @default(cuid())
+  name               String
+  email              String                 @unique
+  cell               String?
+  subjectSpecialties Json
+  availability       Json
+  preferredTeacherId String?
+  loadLimitConfigId  String?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  attendanceRecords  SubstituteAttendance[]
+  loadLimitConfig    LoadLimitConfig?       @relation(fields: [loadLimitConfigId], references: [id])
+
+  @@map("substitutes")
+}
+
+model SubstituteAttendance {
+  id            String     @id @default(cuid())
+  substituteId  String
+  absenceId     String
+  date          DateTime
+  status        String
+  periodsWorked Json?
+  notes         String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  absence       Absence    @relation(fields: [absenceId], references: [id])
+  substitute    Substitute @relation(fields: [substituteId], references: [id])
+
+  @@unique([substituteId, absenceId])
+  @@map("substitute_attendance")
+}
+
+model ScheduleConfig {
+  id          String   @id @default(cuid())
+  schoolId    String
+  name        String
+  type        String
+  description String?
+  config      Json
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  school      School   @relation(fields: [schoolId], references: [id])
+
+  @@map("schedule_configs")
+}
+
+model PeriodConfig {
+  id              String           @id @default(cuid())
+  schoolId        String
+  name            String
+  label           String
+  startTime       String?
+  endTime         String?
+  duration        Int?
+  type            String           @default("academic")
+  isTeaching      Boolean          @default(true)
+  isCoverable     Boolean          @default(true)
+  order           Int              @default(0)
+  isActive        Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  masterSchedules MasterSchedule[]
+  school          School           @relation(fields: [schoolId], references: [id])
+
+  @@unique([schoolId, label])
+  @@map("period_configs")
+}
+
+model DepartmentConfig {
+  id                      String   @id @default(cuid())
+  schoolId                String
+  name                    String
+  code                    String
+  sameDepartmentCoverage  Boolean  @default(true)
+  crossDepartmentCoverage Boolean  @default(true)
+  substituteCoverage      Boolean  @default(true)
+  coveragePriority        Int      @default(1)
+  rules                   Json?
+  isActive                Boolean  @default(true)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  school                  School   @relation(fields: [schoolId], references: [id])
+
+  @@unique([schoolId, code])
+  @@map("department_configs")
+}
+
+model LoadLimitConfig {
+  id                    String       @id @default(cuid())
+  schoolId              String
+  name                  String
+  type                  String
+  maxPeriodsPerDay      Int          @default(6)
+  maxPeriodsPerWeek     Int          @default(30)
+  maxConsecutivePeriods Int          @default(4)
+  minPrepPeriodsPerDay  Int          @default(1)
+  minLunchPeriodsPerDay Int          @default(1)
+  constraints           Json?
+  isActive              Boolean      @default(true)
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+  school                School       @relation(fields: [schoolId], references: [id])
+  substitutes           Substitute[]
+
+  @@map("load_limit_configs")
+}
+
+model ConstraintConfig {
+  id          String   @id @default(cuid())
+  schoolId    String
+  name        String
+  category    String
+  ruleType    String
+  description String
+  conditions  Json
+  actions     Json
+  priority    Int      @default(1)
+  isEnforced  Boolean  @default(true)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  school      School   @relation(fields: [schoolId], references: [id])
+
+  @@map("constraint_configs")
+}

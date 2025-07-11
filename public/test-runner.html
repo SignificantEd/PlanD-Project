@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PlanD Assignment Tests</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .instructions {
+            background: #e8f4fd;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196F3;
+        }
+        .console-output {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .status.loading {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 PlanD Assignment Test Runner</h1>
+        
+        <div class="instructions">
+            <h3>📋 Instructions:</h3>
+            <ol>
+                <li>Open your browser's Developer Console (F12 or right-click → Inspect → Console)</li>
+                <li>Click the "Run Tests" button below</li>
+                <li>Watch the console for detailed test output</li>
+                <li>Check the results displayed on this page</li>
+            </ol>
+        </div>
+
+        <div id="status" class="status loading">
+            ⏳ Ready to run tests...
+        </div>
+
+        <button id="runTests" onclick="runTests()" style="
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        ">🔬 Run Assignment Tests</button>
+
+        <div id="consoleOutput" class="console-output" style="display: none;">
+            <strong>Console Output:</strong>
+            <div id="output"></div>
+        </div>
+    </div>
+
+    <script>
+        // Capture console.log output
+        const originalLog = console.log;
+        const capturedOutput = [];
+        
+        console.log = function(...args) {
+            // Call original console.log
+            originalLog.apply(console, args);
+            
+            // Capture for display
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            capturedOutput.push(message);
+            
+            // Update display
+            updateOutput();
+        };
+
+        function updateOutput() {
+            const outputDiv = document.getElementById('output');
+            const consoleOutput = document.getElementById('consoleOutput');
+            
+            if (capturedOutput.length > 0) {
+                outputDiv.textContent = capturedOutput.join('\n');
+                consoleOutput.style.display = 'block';
+            }
+        }
+
+        function updateStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+
+        function runTests() {
+            updateStatus('🔄 Loading test script...', 'loading');
+            
+            // Clear previous output
+            capturedOutput.length = 0;
+            updateOutput();
+            
+            try {
+                // Load the test script
+                const script = document.createElement('script');
+                script.src = '/tests/runAssignmentTests.js';
+                script.onload = function() {
+                    updateStatus('✅ Tests completed! Check console for details.', 'success');
+                };
+                script.onerror = function() {
+                    updateStatus('❌ Failed to load test script. Check if dev server is running.', 'error');
+                };
+                document.head.appendChild(script);
+            } catch (error) {
+                updateStatus(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run tests when page loads
+        window.addEventListener('load', function() {
+            setTimeout(runTests, 1000);
+        });
+    </script>
+</body>
+</html> 

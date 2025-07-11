@@ -1,0 +1,25 @@
+teacherName,department,period,subject,room,dayOfWeek,isTeaching
+John Smith,Math,Period 1,Algebra I,Rm 201,,true
+John Smith,Math,Period 2,Prep,Rm 201,,false
+John Smith,Math,Period 3,Geometry,Rm 201,,true
+John Smith,Math,Period 4,Algebra II,Rm 201,,true
+John Smith,Math,Period 5,Lunch,Cafeteria,,false
+John Smith,Math,Period 6,Algebra I,Rm 201,,true
+John Smith,Math,Period 7,Duty,Hallway,,false
+John Smith,Math,Period 8,Geometry,Rm 201,,true
+Sarah Jones,English,Period 1,English 9,Rm 105,,true
+Sarah Jones,English,Period 2,English 10,Rm 105,,true
+Sarah Jones,English,Period 3,Prep,Rm 105,,false
+Sarah Jones,English,Period 4,English 11,Rm 105,,true
+Sarah Jones,English,Period 5,Lunch,Cafeteria,,false
+Sarah Jones,English,Period 6,English 12,Rm 105,,true
+Sarah Jones,English,Period 7,Duty,Library,,false
+Sarah Jones,English,Period 8,English 9,Rm 105,,true
+Emily Brown,Science,Period 1,Biology,Rm 301,,true
+Emily Brown,Science,Period 2,Chemistry,Rm 301,,true
+Emily Brown,Science,Period 3,Prep,Rm 301,,false
+Emily Brown,Science,Period 4,Physics,Rm 301,,true
+Emily Brown,Science,Period 5,Lunch,Cafeteria,,false
+Emily Brown,Science,Period 6,Biology,Rm 301,,true
+Emily Brown,Science,Period 7,Duty,Lab,,false
+Emily Brown,Science,Period 8,Chemistry,Rm 301,,true 
