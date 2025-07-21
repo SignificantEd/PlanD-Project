@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { signIn, getSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
+// import Link from "next/link"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -12,28 +12,60 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault()
+  //   setIsLoading(true)
+  //   setError("")
+
+  //   try {
+  //     const result = await signIn("credentials", {
+  //       email,
+  //       password,
+  //       redirect: false,
+  //     })
+
+  //     if (result?.error) {
+  //       setError("Invalid email or password")
+  //     } else {
+  //       // Check if user is authenticated
+  //       const session = await getSession()
+  //       if (session) {
+  //         router.push("/dashboard")
+  //       }
+  //     }
+  //   } catch (error) {
+  //     setError(`An error occurred. Please try again: ${error}`)
+  //   } finally {
+  //     setIsLoading(false)
+  //   }
+  // }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
 
     try {
+      console.log('Attempting login with:', { email, password }) // Add this
       const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
       })
-
+      
+      console.log('Sign in result:', result) // Add this
+      
       if (result?.error) {
         setError("Invalid email or password")
+        console.log('Auth error:', result.error) // Add this
       } else {
-        // Check if user is authenticated
         const session = await getSession()
+        console.log('Session:', session) // Add this
         if (session) {
           router.push("/dashboard")
         }
       }
     } catch (error) {
+      console.error('Login error:', error) // Add this
       setError("An error occurred. Please try again.")
     } finally {
       setIsLoading(false)
@@ -132,7 +164,7 @@ export default function LoginPage() {
 
           <div className="text-center">
             <p className="text-xs text-gray-500">
-              Test credentials: admin@school.com / password123
+              Test credentials: admin@debug.edu / password123
             </p>
           </div>
         </form>

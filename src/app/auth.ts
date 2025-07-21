@@ -1,18 +1,16 @@
-import NextAuth from "next-auth"
+import NextAuth, {AuthOptions} from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
+import { PrismaClient } from '@prisma/client'
 
-// Hardcoded test user - in production, this would come from a database
-const TEST_USER = {
-  id: "1",
-  email: "admin@school.com",
-  password: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // "password123"
-  name: "School Administrator",
-  role: "admin",
-  schoolId: "1"
-}
+// Create Prisma client as a global variable to prevent multiple instances
+const globalForPrisma = global as unknown as { prisma: PrismaClient }
 
-const handler = NextAuth({
+const prisma = globalForPrisma.prisma || new PrismaClient()
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -25,22 +23,29 @@ const handler = NextAuth({
           return null
         }
 
-        // Check if it's our test user
-        if (credentials.email === TEST_USER.email) {
-          const isValidPassword = await bcrypt.compare(credentials.password, TEST_USER.password)
-          
-          if (isValidPassword) {
-            return {
-              id: TEST_USER.id,
-              email: TEST_USER.email,
-              name: TEST_USER.name,
-              role: TEST_USER.role,
-              schoolId: TEST_USER.schoolId
-            }
+        const user = await prisma.user.findUnique({
+          where: {
+            email: credentials.email
           }
+        })
+
+        if (!user) {
+          return null
         }
 
-        return null
+        const isValidPassword = await bcrypt.compare(credentials.password, user.password)
+        
+        if (!isValidPassword) {
+          return null
+        }
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          schoolId: user.schoolId
+        }
       }
     })
   ],
@@ -68,6 +73,7 @@ const handler = NextAuth({
     }
   },
   secret: process.env.NEXTAUTH_SECRET || "your-secret-key-change-in-production"
-})
+}
 
+const handler = NextAuth(authOptions)
 export { handler as GET, handler as POST }
