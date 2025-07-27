@@ -277,7 +277,7 @@ export const sampleAssignments: IAssignment[] = [
     assignedToName: 'Alex Carter',
     assignmentType: 'External Sub',
     date: '2024-01-15',
-    status: 'Approved',
+    status: 'approved',
     notes: 'Regular coverage assignment',
     approvedBy: 'admin1',
     approvedAt: new Date('2024-01-14'),
@@ -294,7 +294,7 @@ export const sampleAssignments: IAssignment[] = [
     assignedToName: 'Ms. Jennifer Adams',
     assignmentType: 'Internal Coverage',
     date: '2024-01-15',
-    status: 'Pending Approval',
+    status: 'assigned',
     notes: 'Internal coverage assignment',
     createdAt: new Date('2024-01-14'),
     updatedAt: new Date('2024-01-14')
@@ -306,10 +306,9 @@ export const sampleSettings: ISettings = {
   schoolName: 'Sample High School',
   schoolYearStart: '2024-09-01',
   schoolYearEnd: '2025-06-30',
-  defaultDayType: 'A',
   periodsPerDay: 8,
   periodNames: ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th'],
-  abScheduleType: 'Daily Alternating',
+  abScheduleType: 'None',
   nonTeachingPeriodTypes: ['Prep', 'PLC', 'PD', 'Lunch'],
   maxSubstituteCoverage: 6,
   maxInternalCoverageNormal: 2,
@@ -321,9 +320,12 @@ export const sampleSettings: ISettings = {
     { name: 'Half Day AM', periods: ['1st', '2nd', '3rd', '4th'] },
     { name: 'Half Day PM', periods: ['5th', '6th', '7th', '8th'] }
   ],
-  currentDayType: 'A',
   approvalRequired: true,
   autoAssignEnabled: true,
+  maxPeriodsPerPerson: 6,
+  maxConsecutivePeriodsPerPerson: 3,
+  fullDayThreshold: 5,
+  conflictDetectionEnabled: true,
   createdAt: new Date('2024-01-01'),
   updatedAt: new Date('2024-01-01')
 };
@@ -337,7 +339,7 @@ export const sampleCoverageResults: ICoverageResult[] = [
     reason: 'Best match for Mathematics department',
     candidateEvaluated: 5,
     assignmentType: 'External Sub',
-    status: 'Approved'
+    status: 'approved'
   },
   {
     period: '2nd',
@@ -346,7 +348,7 @@ export const sampleCoverageResults: ICoverageResult[] = [
     reason: 'Internal coverage - available during period',
     candidateEvaluated: 3,
     assignmentType: 'Internal Coverage',
-    status: 'Pending Approval'
+    status: 'assigned'
   }
 ];
 

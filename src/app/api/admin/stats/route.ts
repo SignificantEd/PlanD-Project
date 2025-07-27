@@ -7,22 +7,27 @@ const prisma = new PrismaClient();
 export async function GET() {
   try {
     const today = new Date().toISOString().split('T')[0];
+    const currentDate = new Date();
     
-    // Get all absences for today
+    // Get all active absences (today and future dates)
     const absences = await prisma.absence.findMany({
       where: { 
-        date: new Date(today)
+        date: {
+          gte: currentDate // Greater than or equal to today
+        }
       },
       include: {
         teacher: true
       }
     });
 
-    // Get all coverage assignments for today
+    // Get all coverage assignments for active absences
     const coverageAssignments = await prisma.coverageAssignment.findMany({
       where: {
         absence: {
-          date: new Date(today)
+          date: {
+            gte: currentDate // Greater than or equal to today
+          }
         }
       }
     });
@@ -64,8 +69,19 @@ export async function GET() {
     // Calculate time saved (estimate: 5 minutes per assignment)
     const timeSaved = assignmentsMade * 5;
 
-    // Calculate pending approvals
-    const pendingApprovals = coverageAssignments.filter(ca => ca.status === 'unassigned').length;
+    // Calculate pending approvals - count individual period assignments that need approval
+    let pendingApprovals = 0;
+    coverageAssignments.forEach(assignment => {
+      if (assignment.status === 'assigned') { // Only count assignments that need approval
+        // Count each period assignment that exists
+        const periodKeys = ['period1st', 'period2nd', 'period3rd', 'period4th', 'period5th', 'period6th', 'period7th', 'period8th'];
+        periodKeys.forEach(key => {
+          if (assignment[key as keyof typeof assignment]) {
+            pendingApprovals++;
+          }
+        });
+      }
+    });
 
     // Calculate coverage rate
     const totalPeriods = periodsToCover;

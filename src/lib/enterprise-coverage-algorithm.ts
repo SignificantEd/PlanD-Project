@@ -9,6 +9,9 @@ import {
   ICandidateStaff
 } from '../types/interfaces';
 
+// Import notification service
+import { notificationService, CoverageNotificationData } from './notification-service';
+
 /**
  * Enterprise-Grade PlanD Coverage Assignment Algorithm
  *
@@ -41,6 +44,7 @@ interface AssignmentResult {
   coverageResults: ICoverageResult[];
   totalCandidatesEvaluated: number;
   processingTime: number;
+  notificationData?: CoverageNotificationData;
 }
 
 /**
@@ -107,11 +111,37 @@ export async function assignCoverageForDate(
   console.log('Total Candidates Evaluated:', totalCandidatesEvaluated);
   console.log('Processing Time:', processingTime, 'ms');
 
+  // Prepare notification data
+  const notificationData: CoverageNotificationData = {
+    absenceId: context.absences.length > 0 ? context.absences[0].id : '',
+    assignments: allAssignments.map(assignment => ({
+      id: assignment.id,
+      period: assignment.period,
+      assignedToId: assignment.assignedToId,
+      assignedToType: assignment.assignmentType as 'Substitute' | 'Teacher' | 'Paraprofessional',
+      subject: 'TBD', // This would need to be looked up from master schedule
+      room: 'TBD', // This would need to be looked up from master schedule
+      isEmergency: assignment.notes?.includes('emergency') || assignment.notes?.includes('override') || false,
+      notes: assignment.notes || ''
+    })),
+    uncoveredPeriods: [], // This would be populated from unassigned periods
+    constraintViolations: [], // This would be populated from constraint checks
+    emergencyOverrides: [] // This would be populated from emergency assignments
+  };
+
+  // Send notifications asynchronously (don't wait for completion)
+  if (allAssignments.length > 0 || notificationData.uncoveredPeriods.length > 0) {
+    notificationService.sendCoverageNotifications(notificationData).catch(error => {
+      console.error('❌ Failed to send notifications:', error);
+    });
+  }
+
   return {
     assignments: allAssignments,
     coverageResults: allCoverageResults,
     totalCandidatesEvaluated,
-    processingTime
+    processingTime,
+    notificationData
   };
 }
 
@@ -247,7 +277,7 @@ async function processAbsence(
           assignedToName: fullDayResult.substitute.name,
           assignmentType: 'External Sub',
           date: context.date,
-          status: 'Pending Approval',
+          status: 'assigned', // Needs approval
           createdAt: new Date(),
           updatedAt: new Date()
         };
@@ -261,7 +291,7 @@ async function processAbsence(
           reason: `Full-day substitute assigned (${fullDayResult.substitute.assignedCoverageCount}/${fullDayResult.substitute.maxDailyLoad} periods)`,
           candidateEvaluated: candidatesEvaluated,
           assignmentType: 'External Sub',
-          status: 'Pending Approval'
+          status: 'assigned' // Needs approval
         };
         
         coverageResults.push(coverageResult);
@@ -323,7 +353,7 @@ async function assignCoverageForPeriod(
         reason: 'Manual override assignment',
         candidateEvaluated: 1,
         assignmentType: 'Manual Override',
-        status: 'Pending Approval'
+        status: 'assigned'
       },
       candidatesEvaluated: 1
     };
@@ -343,7 +373,7 @@ async function assignCoverageForPeriod(
         reason: substituteResult.reason,
         candidateEvaluated: candidatesEvaluated,
         assignmentType: 'External Sub',
-        status: 'Pending Approval'
+        status: 'assigned'
       },
       candidatesEvaluated
     };
@@ -365,7 +395,7 @@ async function assignCoverageForPeriod(
         reason: normalTeacherResult.reason,
         candidateEvaluated: candidatesEvaluated,
         assignmentType: 'Internal Coverage',
-        status: 'Pending Approval'
+        status: 'assigned'
       },
       candidatesEvaluated
     };
@@ -387,7 +417,7 @@ async function assignCoverageForPeriod(
         reason: emergencyTeacherResult.reason,
         candidateEvaluated: candidatesEvaluated,
         assignmentType: 'Emergency Coverage',
-        status: 'Pending Approval'
+        status: 'assigned'
       },
       candidatesEvaluated
     };
@@ -405,7 +435,7 @@ async function assignCoverageForPeriod(
       reason: 'No available staff after exhausting all role priorities',
       candidateEvaluated: candidatesEvaluated,
       assignmentType: 'No Coverage',
-      status: 'Pending Approval'
+      status: 'assigned'
     },
     candidatesEvaluated
   };
@@ -631,7 +661,7 @@ async function findSubstituteCoverage(
     assignedToName: selectedSub.name,
     assignmentType: 'External Sub',
     date: context.date,
-    status: 'Pending Approval',
+    status: 'assigned',
     createdAt: new Date(),
     updatedAt: new Date()
   };
@@ -724,7 +754,7 @@ async function findInternalTeacherCoverage(
     assignedToName: selectedTeacher.name,
     assignmentType: 'Internal Coverage',
     date: context.date,
-    status: 'Pending Approval',
+    status: 'assigned',
     createdAt: new Date(),
     updatedAt: new Date()
   };
@@ -760,7 +790,7 @@ async function createManualOverrideAssignment(
     assignedToName,
     assignmentType: 'Manual Override',
     date: context.date,
-    status: 'Pending Approval',
+    status: 'assigned',
     createdAt: new Date(),
     updatedAt: new Date()
   };
@@ -787,7 +817,7 @@ async function createNoCoverageAssignment(
     assignedToName: '',
     assignmentType: 'No Coverage',
     date: context.date,
-    status: 'Pending Approval',
+    status: 'assigned',
     notes: 'No available staff after exhausting all role priorities',
     createdAt: new Date(),
     updatedAt: new Date()
@@ -1140,6 +1170,7 @@ function convertToIAbsence(absence: any, teachers?: any[], masterSchedule?: any[
     teacherId: absence.teacherId,
     absentTeacherName: teacherName, // Use looked up name
     date: absence.date instanceof Date ? absence.date.toISOString().split('T')[0] : absence.date,
+    dayType: 'A', // Default to 'A' for one-day cycle
     type: teachingPeriods.length >= 5 ? 'Full Day' : 'Custom',
     periods: teachingPeriods,
     periodsToCover: teachingPeriods, // Only teaching periods need coverage
@@ -1162,7 +1193,7 @@ function convertToIAssignment(assignment: any): IAssignment {
     assignedToName: '', // Would need to be populated
     assignmentType: 'External Sub', // Would need to be determined
     date: '', // Would need to be populated
-    status: 'Pending Approval',
+    status: 'assigned',
     createdAt: assignment.createdAt,
     updatedAt: assignment.updatedAt
   };

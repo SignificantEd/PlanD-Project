@@ -21,9 +21,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // The assignmentId might be a composite ID like "coverageId-period"
+    // Extract the actual coverage assignment ID
+    let coverageAssignmentId = assignmentId;
+    if (assignmentId.includes('-')) {
+      coverageAssignmentId = assignmentId.split('-')[0];
+    }
+
     // Find the coverage assignment
     const assignment = await prisma.coverageAssignment.findUnique({
-      where: { id: assignmentId },
+      where: { id: coverageAssignmentId },
       include: {
         absence: {
           include: {
@@ -35,30 +42,23 @@ export async function POST(request: NextRequest) {
 
     if (!assignment) {
       return NextResponse.json(
-        { error: 'Assignment not found' },
+        { error: `Assignment not found for ID: ${assignmentId} (coverage ID: ${coverageAssignmentId})` },
         { status: 404 }
       );
     }
 
-    // Update the assignment status
+    // Update the assignment status - use the correct coverage assignment ID
     const updateData: any = {
-      status: action === 'approve' ? 'assigned' : 'rejected',
-      notes: action === 'reject' && reason ? reason : assignment.notes
+      status: action === 'approve' ? 'approved' : 'rejected'
     };
 
-    // Add approval/rejection metadata
-    if (action === 'approve') {
-      updateData.approvedAt = new Date();
-      // In a real system, you'd get the current user's ID
-      updateData.approvedBy = 'admin';
-    } else {
-      updateData.rejectedAt = new Date();
-      updateData.rejectedBy = 'admin';
-      updateData.rejectionReason = reason;
+    // Add rejection reason to notes if rejecting
+    if (action === 'reject' && reason) {
+      updateData.notes = reason;
     }
 
-    await prisma.coverageAssignment.update({
-      where: { id: assignmentId },
+    const updatedAssignment = await prisma.coverageAssignment.update({
+      where: { id: coverageAssignmentId }, // Use the extracted coverage assignment ID
       data: updateData
     });
 
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       where: { absenceId: assignment.absenceId }
     });
 
-    const allApproved = allAssignments.every(a => a.status === 'assigned');
+    const allApproved = allAssignments.every(a => a.status === 'approved');
     const anyRejected = allAssignments.some(a => a.status === 'rejected');
 
     let absenceStatus = 'pending';
@@ -85,6 +85,7 @@ export async function POST(request: NextRequest) {
     // Log the action
     console.log(`Assignment ${action}d:`, {
       assignmentId,
+      coverageAssignmentId,
       action,
       reason,
       teacherName: assignment.absence.teacher.name,
@@ -94,14 +95,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: `Assignment ${action}d successfully`,
-      assignmentId,
-      action
+      assignmentId: assignmentId,
+      coverageAssignmentId: coverageAssignmentId,
+      newStatus: updatedAssignment.status,
+      absenceStatus: absenceStatus
     });
 
   } catch (error) {
-    console.error('Error processing assignment approval:', error);
+    console.error('Error approving/rejecting assignment:', error);
     return NextResponse.json(
-      { error: 'Failed to process assignment approval' },
+      { error: 'Failed to process assignment' },
       { status: 500 }
     );
   }

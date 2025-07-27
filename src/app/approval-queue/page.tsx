@@ -21,6 +21,7 @@ export default function ApprovalQueuePage() {
   const [approvalItems, setApprovalItems] = useState<IApprovalQueueItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   // Navigation items for the enterprise system
   const navigationItems = [
@@ -36,6 +37,7 @@ export default function ApprovalQueuePage() {
   ];
 
   useEffect(() => {
+    setMounted(true);
     fetchApprovalQueue();
   }, []);
 
@@ -174,12 +176,12 @@ export default function ApprovalQueuePage() {
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-500">
-                {new Date().toLocaleDateString('en-US', { 
+                {mounted ? new Date().toLocaleDateString('en-US', { 
                   weekday: 'long', 
                   year: 'numeric', 
                   month: 'long', 
                   day: 'numeric' 
-                })}
+                }) : 'Loading...'}
               </span>
             </div>
           </div>
@@ -338,7 +340,7 @@ export default function ApprovalQueuePage() {
             ) : (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
                 <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No pending approvals</h3>
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No assignments awaiting approval</h3>
                 <p className="mt-1 text-sm text-gray-500">
                   All coverage assignments have been reviewed and processed.
                 </p>

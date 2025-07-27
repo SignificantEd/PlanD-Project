@@ -40,6 +40,7 @@ export interface IAbsence {
   teacherId: string;
   absentTeacherName: string;
   date: string; // date string
+  dayType: 'A' | 'B'; // A/B day designation
   type: 'Full Day' | 'Half Day AM' | 'Half Day PM' | 'Custom' | 'Para';
   periods: string[]; // periods affected by absence, derived from type
   periodsToCover: string[]; // periods where teacher is actually teaching and needs coverage
@@ -61,7 +62,7 @@ export interface IAssignment {
   assignedToName: string;
   assignmentType: 'Manual Override' | 'External Sub' | 'Internal Coverage' | 'Emergency Coverage' | 'No Coverage';
   date: string; // date string
-  status: 'Pending Approval' | 'Approved' | 'Rejected';
+  status: 'assigned' | 'approved' | 'rejected';
   notes?: string; // e.g., reason for emergency
   approvedBy?: string;
   approvedAt?: Date;
@@ -106,7 +107,7 @@ export interface ICoverageResult {
   reason: string;
   candidateEvaluated: number;
   assignmentType: 'Manual Override' | 'External Sub' | 'Internal Coverage' | 'Emergency Coverage' | 'No Coverage';
-  status: 'Pending Approval' | 'Approved' | 'Rejected';
+  status: 'assigned' | 'approved' | 'rejected';
 }
 
 export interface IDashboardStats {

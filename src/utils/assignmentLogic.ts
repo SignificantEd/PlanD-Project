@@ -54,7 +54,7 @@ export function assignCoverage(
           assignedToName: overrideSub.name,
           assignmentType: 'Manual Override',
           date,
-          status: 'Pending Approval',
+          status: 'assigned',
           notes: 'Manual override assignment',
           createdAt: new Date(),
           updatedAt: new Date()

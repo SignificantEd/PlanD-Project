@@ -549,7 +549,7 @@ export default function CoverageAssignmentPage() {
   const handleConfirmAll = async () => {
     const pendingAbsences = absences.filter(absence => 
       Array.isArray(absence.coverageAssignments) && 
-      absence.coverageAssignments.some((assignment: any) => assignment.status === 'Pending Approval')
+      absence.coverageAssignments.some((assignment: any) => assignment.status === 'assigned')
     );
     
     if (pendingAbsences.length === 0) {
@@ -737,7 +737,7 @@ export default function CoverageAssignmentPage() {
           </Button>
           <Button
             onClick={handleConfirmAll}
-            disabled={approvingAll || absences.filter(a => Array.isArray(a.coverageAssignments) && a.coverageAssignments.some((assignment: any) => assignment.status === 'Pending Approval')).length === 0}
+            disabled={approvingAll || absences.filter(a => Array.isArray(a.coverageAssignments) && a.coverageAssignments.some((assignment: any) => assignment.status === 'assigned')).length === 0}
             className="bg-green-600 hover:bg-green-700"
           >
             {approvingAll ? 'Confirming All...' : 'Confirm All Coverage'}
@@ -869,7 +869,7 @@ export default function CoverageAssignmentPage() {
                           {/* Individual Confirm and Edit Buttons */}
                           {Array.isArray(absence.coverageAssignments) && absence.coverageAssignments.length > 0 && (
                             <div className="flex gap-2 ml-4">
-                              {absence.coverageAssignments.some((assignment: any) => assignment.status === 'Pending Approval' || assignment.status === 'assigned') && (
+                              {absence.coverageAssignments.some((assignment: any) => assignment.status === 'assigned') && (
                                 <Button
                                   onClick={() => handleConfirmAbsence(absence.id)}
                                   disabled={approvingIndividual === absence.id}

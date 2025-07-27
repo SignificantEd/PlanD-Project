@@ -155,7 +155,54 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Do NOT create any coverage assignments here
+    // Automatically run the algorithm to create coverage assignments for this absence
+    try {
+      // Import the algorithm function
+      const { assignCoverageForDate } = await import('../../../lib/enterprise-coverage-algorithm');
+      
+      console.log(`🤖 Auto-running algorithm for ${absence.teacher.name} on ${date}...`);
+      
+      // Run the algorithm for this specific date (requires prisma, date, dayType)
+      const result = await assignCoverageForDate(prisma, date, 'A');
+      
+      console.log(`✅ Algorithm completed for ${absence.teacher.name}:`, {
+        totalAssignments: result.assignments?.length || 0,
+        totalCandidatesEvaluated: result.totalCandidatesEvaluated,
+        processingTime: result.processingTime
+      });
+      
+      if (result.assignments && result.assignments.length > 0) {
+        console.log(`📋 ${result.assignments.length} coverage assignments created - should appear in approval queue!`);
+        
+        // Send email notifications to assigned staff
+        try {
+          const { NotificationService } = await import('../../../lib/notification-service');
+          const notificationService = new NotificationService();
+          
+          // Use the notificationData from the algorithm result
+          if (result.notificationData) {
+            await notificationService.sendCoverageNotifications(result.notificationData);
+            console.log(`📬 Email notifications sent to assigned staff`);
+          } else {
+            console.log(`⚠️ No notification data available`);
+          }
+        } catch (notificationError: any) {
+          console.error('❌ Failed to send email notifications:', notificationError);
+          // Continue anyway - the assignments were created successfully
+        }
+      } else {
+        console.log(`⚠️ Algorithm completed but no assignments were created`);
+      }
+      
+    } catch (algorithmError: any) {
+      console.error('❌ Failed to auto-run algorithm:', algorithmError);
+      console.error('Algorithm error details:', {
+        name: algorithmError?.name || 'Unknown',
+        message: algorithmError?.message || 'No message',
+        stack: algorithmError?.stack || 'No stack trace'
+      });
+      // Continue anyway - the absence was created successfully
+    }
 
     return NextResponse.json({
       message: 'Absence created successfully',

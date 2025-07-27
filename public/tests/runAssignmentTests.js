@@ -187,7 +187,7 @@ function assignCoverage(absences, substitutes, teachers) {
                     assignedToName: assignedSubstitute.name,
                     assignmentType: 'External Sub',
                     date: absence.date,
-                    status: 'Pending Approval',
+                    status: 'assigned',
                     notes: `Auto-assigned to ${assignedSubstitute.name}`,
                     createdAt: new Date(),
                     updatedAt: new Date()
