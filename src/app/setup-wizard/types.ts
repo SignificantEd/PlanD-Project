@@ -1,4 +1,5 @@
 // Types for the setup wizard
+
 export type SchoolInfo = {
   name: string;
   location: string;
@@ -18,13 +19,64 @@ export type ScheduleConfig = {
 
 export type StaffUpload = {
   file: File | null;
-  teachers: any[];
+  teachers: {
+    id: string;
+    name: string;
+    email: string;
+    department: string;
+    role: string;
+  }[];
 };
 
 export type SubstitutePool = {
-  substitutes: any[];
+  substitutes: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    subjectSpecialties: string[];
+    certificationLevel: string;
+    availability: {
+      Monday: boolean;
+      Tuesday: boolean;
+      Wednesday: boolean;
+      Thursday: boolean;
+      Friday: boolean;
+    };
+    maxPeriodsPerDay: number;
+    preferredSchools: string[];
+    rating: number;
+    notes: string;
+  }[];
 };
 
 export type CoverageRules = {
-  constraints: any;
+  constraints: {
+    maxSubstituteCoverage: number;
+    maxInternalCoverageNormal: number;
+    maxInternalCoverageEmergency: number;
+    departmentMatchingEnabled: boolean;
+    workloadBalancingEnabled: boolean;
+    approvalRequired: boolean;
+    unionCompliance: boolean;
+    maxConsecutivePeriods: number;
+    preventLunchCoverage: boolean;
+    preventPrepCoverage: boolean;
+    subjectMatchPreference: boolean;
+    experienceWeighting: boolean;
+    notificationSettings: {
+      emailNotifications: boolean;
+      smsNotifications: boolean;
+      adminAlerts: boolean;
+      dailyReports: boolean;
+    };
+    emergencyProtocols: {
+      autoAssignUncovered: boolean;
+      escalationTime: number;
+      backupContacts: {
+        name: string;
+        phone: string;
+      }[];
+    };
+  };
 }; 
